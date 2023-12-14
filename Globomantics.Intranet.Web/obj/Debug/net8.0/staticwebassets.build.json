@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ABPLI1XKPwGgy/HQB56boxXnvLs+KGN2z3VsBybvHxI=",
+  "Source": "Globomantics.Intranet.Web",
+  "BasePath": "_content/Globomantics.Intranet.Web",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
