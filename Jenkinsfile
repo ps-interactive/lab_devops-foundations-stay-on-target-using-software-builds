@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Version Control') {
             steps {
-                checkout changelog: false, poll: false, scm: scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'file:////home/code']])
+                checkout changelog: false, poll: false, scm: scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'file:////home/code']])
             }
         }
         stage('Build') {
