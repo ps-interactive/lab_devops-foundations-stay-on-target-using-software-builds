@@ -21,6 +21,11 @@ for i in {1..60}; do
   sleep 5
 done
 
+if ! sudo test -f "$JENKINS_HOME_HOST/secrets/initialAdminPassword"; then
+    echo "ERROR: Jenkins did not become ready"
+    exit 1
+fi
+
 echo "Get initial admin password"
 INITIAL_ADMIN_PASSWORD=$(sudo cat "$JENKINS_HOME_HOST/secrets/initialAdminPassword")
 
@@ -44,8 +49,8 @@ sed -i "s#\"noProxy\"#\"$noProxy\"#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
 echo "Run Jenkins setup scripts"
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_setup_proxy.groovy"
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_disable_wizard.groovy"
-java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_install_plugins.groovy"
-java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_create_admin_user.groovy"
+java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth "admin:$INITIAL_ADMIN_PASSWORD" groovy = < "$SETUP_DIR/jenkins_create_admin_user.groovy"
+java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth "admin:$INITIAL_ADMIN_PASSWORD" groovy = < "$SETUP_DIR/jenkins_install_plugins.groovy"
 
 echo "Restart Jenkins container so newly installed plugins actually load"
 sudo docker restart "$JENKINS_CONTAINER"
@@ -58,6 +63,11 @@ for i in {1..60}; do
   fi
   sleep 5
 done
+
+if ! curl -fs "$JENKINS_URL/login" >/dev/null 2>&1; then
+    echo "ERROR: Jenkins failed to restart"
+    exit 1
+fi
 
 echo "Configure and download the .NET SDK global tool (requires dotnet-sdk plugin, installed above, to now be loaded)"
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth jenkins:jenkins groovy = < "$SETUP_DIR/jenkins_configure_dotnet_sdk.groovy"
