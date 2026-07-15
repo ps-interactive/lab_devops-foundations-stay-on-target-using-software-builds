@@ -10,20 +10,21 @@ CLI_JAR="/tmp/jenkins-cli.jar"
 # Clean problematic shebangs from Groovy files, if any got copied in with one
 sed -i '/^#!/d' "$SETUP_DIR"/*.groovy
 
-echo "Wait for Jenkins to be fully ready (password file + HTTP + CLI subsystem)"
+echo "Wait for Jenkins to be fully ready"
 for i in {1..60}; do
   if sudo test -f "$JENKINS_HOME_HOST/secrets/initialAdminPassword" && \
+     sudo test -f "$JENKINS_HOME_HOST/jenkins.model.JenkinsLocationConfiguration.xml" && \
      curl -fs "$JENKINS_URL/login" >/dev/null 2>&1; then
-    echo "Jenkins is responding; allowing extra time for CLI subsystem..."
-    sleep 20
+    echo "Jenkins is ready"
+    sleep 10
     break
   fi
   sleep 5
 done
 
-if ! sudo test -f "$JENKINS_HOME_HOST/secrets/initialAdminPassword"; then
-    echo "ERROR: Jenkins did not become ready"
-    exit 1
+if ! sudo test -f "$JENKINS_HOME_HOST/jenkins.model.JenkinsLocationConfiguration.xml"; then
+  echo "ERROR: Jenkins root URL was not configured"
+  exit 1
 fi
 
 echo "Get initial admin password"
